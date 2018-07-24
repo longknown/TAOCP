@@ -1,0 +1,9 @@
+[Game Rules for 2 players]
+- The pile contains n chips, which can be arbitrarily defined at game setup;
+- The first player removes any number of chips except to take the whole pile;
+- Each person can remove one or more chips but not more than twice as many chips as the preceding player has taken;
+- The player who removes the last chip wins!
+
+[Game Mode]
+- Default mode is user vs. computer, in which computer would take the optimal steps;
+- 2 Player mode would be supported as well.
