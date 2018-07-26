@@ -57,6 +57,15 @@ int setup_game(void)
                     gPileSize = get_pile_size();
                     gMode = mode;
                     goto setup;
+                case 3: // hidden mode, computer1 vs. computer2
+                    printf("Wow! You discovered the hidden mode, Computer1 vs. Computer2\n");
+                    strcpy(player1, "Computer1");
+                    strcpy(player2, "Computer2");
+                    printf("Choose the number of piles to play (>= 1):\n"
+                            ">>> ");
+                    gPileSize = get_pile_size();
+                    gMode = mode;
+                    goto setup;
                 default:
                     break;
             }
@@ -74,6 +83,11 @@ setup:
                     "Pile size: %d\n", gMode, gPlayer1, (gIsFirst)? "gPlayer1": "computer", gPileSize);
             break;
         case 2:
+            printf("Game mode = %d\n"
+                    "%s vs. %s, and %s goes first\n"
+                    "Pile size: %d\n", gMode, gPlayer1, gPlayer2, gPlayer1, gPileSize);
+            break;
+        case 3:
             printf("Game mode = %d\n"
                     "%s vs. %s, and %s goes first\n"
                     "Pile size: %d\n", gMode, gPlayer1, gPlayer2, gPlayer1, gPileSize);

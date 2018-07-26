@@ -10,7 +10,7 @@ extern int gPileSize;
 typedef struct player {
     char *name;
     // choose the number of chips, and change the draw limits for the next player
-    void (*play)(struct player *);
+    int (*play)(struct player *, int, int);
     struct player *next;
 } player_t;
 
@@ -20,7 +20,7 @@ typedef struct player {
  */
 int setup_game(void);
 void start_game(void);
-void computer_play(struct player *);
+int computer_play(struct player *, int, int);
 
 /*
  * handy functions to read the yes/no answer from user's input,

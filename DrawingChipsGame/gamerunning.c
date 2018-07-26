@@ -5,7 +5,7 @@
 static int sRemainPiles;
 static int sDrawLimits;
 static player_t *current_player;
-void human_play(struct player *);
+int human_play(struct player *, int, int);
 
 /*
  * referee, decide the turn and declare the game result
@@ -33,7 +33,10 @@ void start_game(void)
             p2.play = computer_play;
         else
             p1.play = computer_play;
+    } else if(gMode == 3) {
+        p1.play = p2.play = computer_play;
     }
+
     sRemainPiles = gPileSize;
     sDrawLimits = gPileSize -1;
 
@@ -50,7 +53,11 @@ int referee(void)
             "\tNext player: %s\n"
             "\tYou can draw [1 ~ %d] chips\n\n"
             , sRemainPiles, current_player->name, sDrawLimits);
-    current_player->play(current_player);
+    int draw_num;
+    printf("%s. >>> ", current_player->name);
+    draw_num = current_player->play(current_player, sDrawLimits, sRemainPiles);
+    sRemainPiles -= draw_num;
+    sDrawLimits = min(sRemainPiles, 2 * draw_num);
     if(sRemainPiles == 0) {
         printf("!!!!!!!!!! @%s WINs !!!!!!!!!!\n", current_player->name);
         return 0;
@@ -60,16 +67,13 @@ int referee(void)
     }
 }
 
-void human_play(struct player *player)
+int human_play(struct player *player, int limit, int __unused)
 {
     int num;
     for(;;) {
-        printf("%s. >>> ", player->name);
-        if(read_input_number(&num) && num > 0 && num <= sDrawLimits) {
-            sRemainPiles -= num;
-            sDrawLimits = 2 * num;
-            sDrawLimits = min(sRemainPiles, sDrawLimits);
-            return;
+        if(read_input_number(&num) && num > 0 && num <= limit) {
+            return num;
         }
+        printf("%s. >>> ", player->name);
     }
 }
