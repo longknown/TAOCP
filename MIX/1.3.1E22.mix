@@ -1,0 +1,34 @@
+// 1) Minimum memory consumption
+// memory consumption: 8 words
+// time: 2+1+12*(10+2+1+1)=171 units
+
+2000 X              // the integer number
+2001 LDA    2000
+2002 ENT1   12
+2003 MUL    2000    // currently, the result is in rX
+2004 SLAX   5       // shift rX to rA, to continue next round
+2005 DEC1   1
+2006 J1P    2003
+2007 HLT
+
+
+// 2) Minimum execution time
+// X * X^4 * X^8
+// memory consumption: 17 words
+// time: 66 units
+
+2000 X
+2001 LDA    2000
+2002 MUL    2000
+2003 STX    1999
+2004 SLAX   5
+2005 MUL    1999    // rX contains X^4
+2006 STX    1998
+2007 SLAX   5
+2008 MUL    1998    // rX now contains X^8
+2009 SLAX   5
+2010 MUL    1999
+2011 SLAX   5
+2012 MUL    2000
+2013 SLAX   5
+2014 HLT
