@@ -1,0 +1,10 @@
+// N in rI4, program to set rJ to N, 0<N<=3000
+3000 STA    -1,4
+3001 ENT1   -1,4
+3002 MOVE   3006(1)
+3003 JMP    -1,4
+
+// recover M=rI4-1 memory content
+3004 LDA    -1,4
+3005 HLT    1
+3006 JMP    3004

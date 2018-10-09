@@ -1,0 +1,35 @@
+// 0000-N be set to zeros, N is stored in rI2
+
+// a) Short program, move 1 words at a time, 
+//  suppose instructions are stored at location 3000
+//  time: 4*(N+1) 
+
+3000 STZ     0,2(0:5)
+3001 DEC2    1
+3002 J2NN    3000
+
+// b) Faster program, try using MOVE 63 words at a time
+// time = 5+(5+63*2)*(N/63)+2+(N%63)*5 = 7+131*(N/63)+5*(N%63)
+// Assumption: instructions cannot be modified;
+// otherwise, we can modify MOVE instruction to adjust to the
+// remaining number of bytes
+
+// set 63 words at a time
+3000 STZ    0
+3001 ENTA   0
+3002 DEC2   1
+3003 J2N    3015
+3004 DEC2   63
+3005 J2N    3009
+3006 INCA   1
+3007 MOVE   0(63)
+3008 JMP    3004
+
+// the remainder, use STZ for each word
+3009 INC2   63
+3010 J2N    3015
+3011 STZ    1,1
+3012 INC1   1
+3013 DEC2   1
+3014 J2NN   3011
+3015 NOP

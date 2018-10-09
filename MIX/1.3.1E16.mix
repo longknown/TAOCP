@@ -1,0 +1,16 @@
+// sets memory cells 0000-0099 to zeros
+
+
+a) as short as possible
+STZ     0(0:5)
+ENT1    1
+(if word-size == 100)
+MOVE    0(99)
+(else)
+MOVE    0(49)
+MOVE    0(50)
+
+b) as fast as possible
+STZ 0(0:5)
+...
+STZ 99(0:5)

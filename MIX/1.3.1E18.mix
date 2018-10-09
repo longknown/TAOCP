@@ -1,0 +1,19 @@
+// set all 4000 memory cells to HLT instruction and then stops
+// 1) suppose our instructions start at 0000
+
+0000 ENT1   14          // store the addr(HLT)+1 to rI1
+0001 ENT2   3984        // 3999-addr(HLT)
+0002 DEC2   63
+0003 J2N    6           // if rI2 < 0; jump to modify MOVE instruction & execute MOVE instruction
+0004 MOVE   -1,1(63)    // later, the word number would be modified to the remainder
+0005 JMP    0002        // later, it would be modified to jump to other address
+0006 ENTA   63,2        // now rI2: |+|0|0|0|0|M|, store rI2+63 to rA
+0007 STA    4(4:4)      // modify 0004 MOVE F field
+0008 ENTA   11          // store addr of next part of instruction
+0009 STA    5(2:2)      // modify 0005 JUMP M field
+0010 JMP    4
+
+// set the instruction area to HLT
+0011 ENT1   0           // using MOVE, and start from 0
+0012 MOVE   13(12)      // starting from 0
+0013 HLT
