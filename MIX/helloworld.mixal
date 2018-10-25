@@ -1,0 +1,12 @@
+* A hello world MIXAL program
+* using GNU MDK toolkit to run on real computers
+
+TERM    EQU     19              device number of mix console
+START   ORIG    3000            starting point
+        OUT     MSG(TERM)       print msg
+        HLT     0
+MSG     ALF     "HELLO"
+        ALF     ", WOR"
+        ALF     "LD. S"
+        ALF     "TARTS"
+        END     START

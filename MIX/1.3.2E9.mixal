@@ -1,0 +1,111 @@
+TERM    EQU     19
+START   ORIG    0000
+        LD1     INST(5:5)
+        INC1    TABLE
+        JMP     0,1
+        LD2     INST(4:4)       load F to rI2 for further testing
+        LD3     INST(3:3)       load I to rI3
+        LD4     INST(0:2)       load +-AA to rI4 
+TABLE   ORIG    500
+        JMP     GOOD            NOP is just good
+        JMP     TEST1           ADD
+        JMP     TEST1           SUB
+        JMP     TEST1           MUL
+        JMP     TEST1           DIV
+        JMP     CNH             CHAR/NUM/HLT
+        JMP     SHIFT           SHIFTs
+        JMP     MOVE            MOVE
+        JMP     TEST1           LDA
+        JMP     TEST1           LD1
+        JMP     TEST1           LD2
+        JMP     TEST1           LD3
+        JMP     TEST1           LD4
+        JMP     TEST1           LD5
+        JMP     TEST1           LD6
+        JMP     TEST1           LDX
+        JMP     TEST1           LDAN
+        JMP     TEST1           LD1N
+        JMP     TEST1           LD2N
+        JMP     TEST1           LD3N
+        JMP     TEST1           LD4N
+        JMP     TEST1           LD5N
+        JMP     TEST1           LD6N
+        JMP     TEST1           LDXN
+        JMP     TEST1           STA
+        JMP     TEST1           ST1
+        JMP     TEST1           ST2
+        JMP     TEST1           ST3
+        JMP     TEST1           ST4
+        JMP     TEST1           ST5
+        JMP     TEST1           ST6
+        JMP     TEST1           STX
+        JMP     TEST1           STJ
+        JMP     TEST1           STZ
+        JMP     IO1             JBUS
+        JMP     IO2             IOC
+        JMP     IO1             IN
+        JMP     IO1             OUT
+        JMP     IO1             JRED
+        JMP     JCOND           JMP/JSJ/JOV/JNOV/JL/JE/JG/JGE/JNE/JLE
+        JMP     JREG            JA[N/Z/P/NN/NZ/NP]
+        JMP     JREG            J1[N/Z/P/NN/NZ/NP]
+        JMP     JREG            J2[N/Z/P/NN/NZ/NP]
+        JMP     JREG            J3[N/Z/P/NN/NZ/NP]
+        JMP     JREG            J4[N/Z/P/NN/NZ/NP]
+        JMP     JREG            J5[N/Z/P/NN/NZ/NP]
+        JMP     JREG            J6[N/Z/P/NN/NZ/NP]
+        JMP     JREG            JX[N/Z/P/NN/NZ/NP]
+        JMP     IDE             ['I'NC/'D'EC/'E'NT/ENN]A
+        JMP     IDE             ['I'NC/'D'EC/'E'NT/ENN]1
+        JMP     IDE             ['I'NC/'D'EC/'E'NT/ENN]2
+        JMP     IDE             ['I'NC/'D'EC/'E'NT/ENN]3
+        JMP     IDE             ['I'NC/'D'EC/'E'NT/ENN]4
+        JMP     IDE             ['I'NC/'D'EC/'E'NT/ENN]5
+        JMP     IDE             ['I'NC/'D'EC/'E'NT/ENN]6
+        JMP     IDE             ['I'NC/'D'EC/'E'NT/ENN]X
+        JMP     TEST1           CMPA
+        JMP     TEST1           CMP1
+        JMP     TEST1           CMP2
+        JMP     TEST1           CMP3
+        JMP     TEST1           CMP4
+        JMP     TEST1           CMP5
+        JMP     TEST1           CMP6
+        JMP     TEST1           CMPX
+TEST1   JMP     VADDR           test valid memory addr
+        JMP     VFIELD          test valid Field specs
+        JMP     GOOD
+CHN     CMP2    =2=             test if 0<=F<=2
+        JLE     GOOD
+        JMP     BAD
+SHIFT   CMP2    =5=             test F in 0~5
+        JG      BAD
+        DEC3    1
+        CMP3    =5=             test I <= 6
+        JG      BAD             if I > 6, bad register
+        J3P     GOOD            if I in 1~6, valid
+        J4NN    GOOD            otherwise, AA(with sign)>=0
+        JMP     BAD
+MOVE    JMP     VADDR           valid memory addr is sufficient
+        JMP     GOOD
+IO1     CMP2    =20=            cmp F <= 20
+        JG      BAD
+        JMP     VADDR
+        JMP     GOOD
+IO2     DEC2    7
+        J2NP    GOOD
+        CMP2    =13=            unit should LE 13
+        JG      BAD
+        J4Z     GOOD            M should be 0, for devices other than tapes
+        JMP     BAD
+JCOND
+JREG
+IDE
+GOOD    OUT     GOODMSG(TERM)
+        HLT     0
+BAD     OUT     BADMSG(TERM)
+        HLT     0
+        ORIG    3000
+BADMSG  ALF     "BAD! "
+GOODMSG ALF     "GOOD!"
+INST    ALF     "AAAAA"
+        END     START
