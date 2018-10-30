@@ -1,0 +1,10 @@
+* compute saddle point and store it in rI1
+* find the largest cell in each column ,and
+* validate if it's the smallest in the corresponding row
+
+COLUMN      EQU     8
+ROW         EQU     9
+            ORIG    100
+START       
+
+

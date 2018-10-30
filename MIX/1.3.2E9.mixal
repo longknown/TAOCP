@@ -1,20 +1,23 @@
 TERM    EQU     19
 START   ORIG    0000
-        LD1     INST(5:5)
+        LD1     INST(5:5)       test C field, and jump to TABLE
+        CMP1    =63=            C should be less than 64
+        JG      BAD
         INC1    TABLE
-        JMP     0,1
-        LD2     INST(4:4)       load F to rI2 for further testing
+        ENTA    0               set rA with 0, rX with F, to validate Field with DIV
+        LDX     INST(4:4)       load F to rX for further testing
         LD3     INST(3:3)       load I to rI3
         LD4     INST(0:2)       load +-AA to rI4 
-TABLE   ORIG    500
-        JMP     GOOD            NOP is just good
+        JMP     0,1             JUMP to TABLE
+        ORIG    0500
+TABLE   JMP     GOOD            NOP is just good
         JMP     TEST1           ADD
         JMP     TEST1           SUB
         JMP     TEST1           MUL
         JMP     TEST1           DIV
-        JMP     CNH             CHAR/NUM/HLT
+        JMP     CHN             CHAR/NUM/HLT
         JMP     SHIFT           SHIFTs
-        JMP     MOVE            MOVE
+        JMP     MOV             MOVE
         JMP     TEST1           LDA
         JMP     TEST1           LD1
         JMP     TEST1           LD2
@@ -74,10 +77,10 @@ TABLE   ORIG    500
 TEST1   JMP     VADDR           test valid memory addr
         JMP     VFIELD          test valid Field specs
         JMP     GOOD
-CHN     CMP2    =2=             test if 0<=F<=2
-        JLE     GOOD
-        JMP     BAD
-SHIFT   CMP2    =5=             test F in 0~5
+CHN     CMPX    =2=             test if 0<=F<=2
+        JG      BAD
+        JMP     GOOD
+SHIFT   CMPX    =5=             test F in 0~5
         JG      BAD
         DEC3    1
         CMP3    =5=             test I <= 6
@@ -85,27 +88,61 @@ SHIFT   CMP2    =5=             test F in 0~5
         J3P     GOOD            if I in 1~6, valid
         J4NN    GOOD            otherwise, AA(with sign)>=0
         JMP     BAD
-MOVE    JMP     VADDR           valid memory addr is sufficient
+MOV     JMP     VADDR           valid memory addr is sufficient
         JMP     GOOD
-IO1     CMP2    =20=            cmp F <= 20
+IO1     CMPX    =20=            cmp F <= 20
         JG      BAD
         JMP     VADDR
         JMP     GOOD
-IO2     DEC2    7
-        J2NP    GOOD
-        CMP2    =13=            unit should LE 13
+IO2     DECX    7
+        JXNP    GOOD
+        CMPX    =13=            unit should LE 13
         JG      BAD
-        J4Z     GOOD            M should be 0, for devices other than tapes
-        JMP     BAD
-JCOND
-JREG
-IDE
+        J4NZ    BAD             M should be 0, for devices other than tapes
+        JMP     GOOD
+JCOND   CMPX    =9=
+        JG      BAD
+        JMP     VADDR
+        JMP     GOOD
+JREG    CMPX    =5=
+        JG      BAD
+        JMP     VADDR
+        JMP     GOOD
+IDE     CMPX    =3=
+        JG      BAD
+        CMP3    =6=             teste bad register
+        JG      BAD
+        JMP     GOOD
+VADDR   STJ     RETA            store rJ in RET to return back to primary routine
+        CMP3    =6=             test if valid register, I <= 6
+        JG      BAD             if I > 6, bad register
+        J3P     RETA            if I > 0, valid addr, and return back
+        J3N     BAD             if I == 0 && AA < 0, bad addr and goto BAD
+        CMP4    =3999=          if AA > 3999, bad addr and goto BAD
+        JG      BAD
+RETA    JMP     *               return back
+VFIELD  STJ     RETF
+        DIV     =8=
+        CMPX    =5=             test remainder(R <= 5)
+        JG      BAD
+        STX     AXCMP
+        CMPA    AXCMP           if (rA <= rX), then a valid field
+        JG      BAD
+RETF    JMP     *               return back
 GOOD    OUT     GOODMSG(TERM)
         HLT     0
 BAD     OUT     BADMSG(TERM)
         HLT     0
         ORIG    3000
-BADMSG  ALF     "BAD! "
-GOODMSG ALF     "GOOD!"
-INST    ALF     "AAAAA"
+BADMSG  ALF     "BAD I"
+        ALF     "NSTRU"
+        ALF     "CTION"
+        ORIG    *+14            we must pad 0 to fill 14 words
+GOODMSG ALF     "GOOD "
+        ALF     "INSTR"
+        ALF     "UCTIO"
+        ALF     "N    "
+        ORIG    *+14            pad 0 to fill 14 words
+AXCMP   CON     0
+INST    ALF     "  G A"
         END     START
