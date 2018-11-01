@@ -1,10 +1,71 @@
 * compute saddle point and store it in rI1
-* find the largest cell in each column ,and
+* find the largest cell in each column, and
 * validate if it's the smallest in the corresponding row
+* in fact, we can record the smallest row in buffer,
+* to avoid repeatedly test saddle point
 
+* rI2: loop over rows; rI3: loop over columns;
+* rI4: offset from table head; rA: value of currently largest cell of the column;
+* rI5: the row number of currently largest cell
+* rI1: the saddle point
 COLUMN      EQU     8
 ROW         EQU     9
-            ORIG    100
-START       
+MATRIX      EQU     3000
+BUF         EQU     3500        store smallest point of each row in this BUF
+            ORIG    0
+START       ENT2    -COLUMN     loop over rows, rI2 <- r-7
+            ENT1    0
+            LDA     MATRIX      initialise with the first cell
+LOOPC       INC2    1
+            J2P     DONE
+            ENT3    -ROW        rI3 loops over column, rI3 <- c-8
+            ENT4    COLUMN-1-ROW,2
+            ENT5    0
+GRTCOL      INC3    1
+            J3P     TESTSADDLE
+            INC4    ROW
+            CMPA    MATRIX,4
+            JL      CHANGEM     if rA is smaller, change the content
+            JMP     GRTCOL
+CHANGEM     LDA     MATRIX,4
+            ENT5    ROW-1,3
+            JMP     GRTCOL      jmp back to GRTCOL to continue finding largest
 
+* testsaddle first find if smallest cell already searched and stored,
+* if not, loop over the whole row, and decide whether the current cell
+* is the smallest, and record the smallest column number in the BUF
+TESTSADDLE  LD6     BUF+ROW-1,5 BUF stores 9 values for 9 rows
+            J6Z     FNDSML
+            DEC6    COLUMN,2  compare rI2 and rI6, check if the current column cell is the smallest, notice, rI6 ranges 1-8, while rI2 ranges 0-7
+            J6Z     FOUND
+            JMP     LOOPC       if not, goto LOOPC and continue the search
 
+* in this testing routine, rI1, rI6, rI3 would be temporarily backed up in BUF+ROW, restored after the routine,
+* rX stores the currently smallest value, rI1 loop over 1~8, rI6 stores the corresponding array addr,
+* rI3 stores the currently smallest column number
+FNDSML      ST1     BUF+ROW     temporarily store some registers in memory, for now registers are lacking
+            ST3     BUF+ROW+1
+            ENT1    -COLUMN
+            ENT6    MATRIX,4
+            ENT3    1
+            DEC6    COLUMN-1,2
+            LDX     1,6
+1H          INC1    1
+            INC6    1
+            J1P     3F
+            CMPX    0,6
+            JG      2F
+            JMP     1B
+2H          LDX     0,6
+            ENT3    COLUMN,1
+            JMP     1B
+3H          ST3     BUF,5       rI5 is not override, still holds the current row number
+            DEC3    COLUMN,2
+            J3Z     FOUND       wow, this is the saddle point
+            LD1     BUF+ROW     sadly, this is NOT the saddle point, restore registers and jump back to LOOPC
+            LD3     BUF+ROW+1
+            JMP     LOOPC
+
+* final result
+FOUND       ENT1    MATRIX,4
+DONE        HLT
