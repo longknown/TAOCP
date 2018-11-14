@@ -1,0 +1,78 @@
+* compute and print rounded harmony numbers S2, S3, S4, S5
+* procedure:
+*   A. Start with mh = 1, S = 1;
+*   B. Set me = mh + 1 and calculate r(n)(1/me) = r;
+*   C. Find mh, the largest m for which r(n)(1/m) = r;
+*   D. Add (mh - me + 1) * r to S and return to Step B.
+*   largest m follows:
+*       10^n/(r+1/2) < m <= 10^n(r-1/2)
+*       ==> so compute floor((2 * 10^n) / (2*r -1))
+
+* rI1: n index of Sn; rI2: m index of rn(m)
+SUM         EQU     500             store Sn in SUM
+EXP10       EQU     SUM+1
+VAR         EQU     SUM+2
+VAR1        EQU     SUM+3
+TERM        EQU     19
+BLOCK       EQU     14
+
+            ORIG    0
+START       ENT1    1
+            ENTA    1
+            STA     EXP10
+LOOP        ENT2    1
+            LDA     EXP10
+            MUL     =10=
+            STX     EXP10
+            STX     SUM
+1H          INC2    1               rI2 is m
+
+* compute floor(10^n / m + 1/2), here thru (2 * 10^n + m) / (2*m)
+            LDA     EXP10
+            ADD     EXP10
+            INCA    0,2
+            ENT3    0,2
+            INC3    0,2             rI3 now contains 2*m
+            ST3     VAR
+            SRC     5
+            ENTA    0
+            DIV     VAR             now, rA contains rn(1/m), noted as 'r' (in short)
+            JAZ     PRINT           if r == 0, print Sn and continue to S(n+1)
+            STA     VAR             store r
+            ADD     VAR
+            DECA    1
+            STA     VAR1            rA holds (2r-1)
+            LDA     EXP10
+            ADD     EXP10
+            DIV     VAR1            rA now holds the largest m for which r(n)(1/m) = r
+            STA     VAR1
+            DECA    -1,2
+            MUL     VAR
+            SRC     5
+            ADD     SUM
+            LDA     SUM
+            LD2     0,VAR1          rI2 is replaced by the largest m
+            JMP     1B
+PRINT       LDA     SUM
+            CHAR    0
+
+* right shift rA:rX circularly by n; right shift rA by 1;
+* store at OUTPUT buffer
+            SRC     0,1
+            STA     FRA
+            STX     INT(1:4)
+            ENT3    30,1            rI3 holds character code of n
+            ST3     OUTPUT(2:2)
+            OUT     OUTPUT(TERM)
+
+            INC1    1
+            CMP1    =5=
+            JLE     LOOP
+            HLT
+
+            ORIG    1000
+OUTPUT      ALF     "S1=  "
+INT         ALF     "0000."
+FRA         ALF     "00000"
+            ORIG    *+BLOCK
+            END     START

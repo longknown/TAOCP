@@ -1,0 +1,57 @@
+* Counting letter frequency from paper tape
+
+TERM        EQU     19
+TAPE        EQU     TERM
+BLOCK       EQU     14
+BUF0        EQU     500
+BUF1        EQU     BUF0+BLOCK+1
+FREQ        EQU     550
+
+* first read in content from paper tape alternatively to 
+* 2 buffers, and count the frequency at the same time.
+            ORIG    0
+START       ENT1    BUF1                store BUF addr for
+            ST1     BUF0+BLOCK              buffer switch
+            ENT1    BUF0
+            ST1     BUF1+BLOCK
+            IN      0,1(TAPE)           read in the first block
+            JBUS    *(TAPE)             make sure first block read
+READ        ENT2    0,1
+            LD1     BLOCK,1
+            IN      0,1(TAPE)
+            ENT3    -BLOCK
+1H          INC3    1
+            J3P     READ
+            INC2    1
+            ENT4    9                   increment F field by 9 each time
+2H          ST4     *+1(4:4)
+            LD5     0,2                 load the corresponding char to rI5
+            CMP5    =46=                if * is found, goto end
+            JE      PRINT
+            LD6     FREQ,5              load the current frequency of the given char
+            INC6    1
+            ST6     FREQ,5
+            INC4    9
+            CMP4    =45=
+            JG      1B
+            JMP     2B
+
+PRINT       ENT1    -55
+3H          LDA     FREQ+56,1
+            ENT2    56,1
+            JAZ     *+6
+            CHAR    0
+            ST2     LETTER(1:1)
+            STA     LETTER(4:5)
+            STX     F1
+            OUT     LETTER(TERM)
+            INC1    1
+            J2N     3B
+            HLT
+
+            ORIG    1000
+LETTER      ALF     "A  00"
+F1          ALF     "00000"
+
+            ORIG    *+BLOCK
+            END     START

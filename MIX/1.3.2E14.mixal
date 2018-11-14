@@ -1,0 +1,99 @@
+* compute the date of Easter of the given year
+
+* DATA memory contains data as following:
+*   DATA[0]-G, DATA[1]-C, DATA[2]-X, DATA[3]-D,
+*   DATA[4-5]-temporary vars,
+TERM        EQU     19
+BLOCK       EQU     14
+DATA        EQU     500
+            ORIG    0
+START       ENT1    1998
+LOOP        ENTX    0,1
+            ENTA    0
+            DIV     =19=
+            INCX    1               rX now contains the Golder number
+            STX     DATA            DATA[0] now contains G
+            ENTX    0,1
+            ENTA    0
+            DIV     =100=
+            INCA    1               rA now contains Century number
+            STA     DATA+1          store Century number DATA+1
+            MUL     =3=
+            DIV     =4=
+            DECA    12              rA now contains X correction
+            STA     DATA+2          X correction now stores in DATA+2
+            ENTA    0,1
+            MUL     =5=
+            DIV     =4=
+            SUB     DATA+2
+            DECA    10              rA now contains D
+            STA     DATA+3
+            LDA     DATA+1          load Century number to rA
+            MUL     =8=
+            INCX    5
+            DIV     =25=
+            DECA    5               rA now contains Z correction
+            INCA    20
+            SUB     DATA+2
+            STA     DATA+4
+            LDA     DATA
+            MUL     =11=            11*G is now in rX
+            SRC     5
+            ADD     DATA+4
+            SRC     5               shift rA to rX for division
+            ENTA    0
+            DIV     =30=            rX now contains E (E15 error is not corrected!)
+            CMPX    =24=            E5: Epact condition jumps
+            JE      INCRE1
+            CMPX    =25=
+            JNE     1F
+            LD2     DATA
+            CMP2    =11=
+            JE      INCRE1
+            JMP     1F
+INCRE1      INCX    1
+1H          STX     DATA+4          E6: Find full moon
+            LDXN    DATA+4              negate rX
+            INCX    44
+            CMPX    =21=
+            JL      *+2
+            JMP     *+2
+            INCX    30
+            STX     DATA+4
+            SRC     5               E7: Advance to Sunday
+            ADD     DATA+3
+            SRC     5
+            ENTA    0
+            DIV     =7=
+            STX     DATA+5
+            LDAN    DATA+5
+            INCA    7
+            ADD     DATA+4
+PRINT       CMPA    =31=
+            JLE     *+4
+            DECA    31
+            ENT3    APRIL
+            JMP     2F
+            ENT3    MARCH
+2H          CHAR    0
+            STX     0,3(1:2)
+            ENTA    0,1
+            CHAR    0
+            STX     2,3
+            OUT     0,3(TERM)
+            INC1    1
+            CMP1    =2038=
+            JLE     LOOP
+            HLT
+
+            ORIG    1000
+APRIL       ALF     "00 AP"
+            ALF     "RIL, "
+            ALF     "00000"
+            ORIG    *+BLOCK
+MARCH       ALF     "00 MA"
+            ALF     "RCH, "
+            ALF     "00000"
+            ORIG    *+BLOCK
+            END     START
+
