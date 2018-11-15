@@ -9,10 +9,13 @@
 *       ==> so compute floor((2 * 10^n) / (2*r -1))
 
 * rI1: n index of Sn; rI2: m index of rn(m)
+* !!!NOICE: m index can exceed the size of rI2, which is 4096
+*       so we have to store it in memory and manipulate with rA & rX
 SUM         EQU     500             store Sn in SUM
 EXP10       EQU     SUM+1
 VAR         EQU     SUM+2
 VAR1        EQU     SUM+3
+M           EQU     SUM+4
 TERM        EQU     19
 BLOCK       EQU     14
 
@@ -21,19 +24,22 @@ START       ENT1    1
             ENTA    1
             STA     EXP10
 LOOP        ENT2    1
+            ST2     M
             LDA     EXP10
             MUL     =10=
             STX     EXP10
             STX     SUM
-1H          INC2    1               rI2 is m
+1H          LDA     M
+            INCA    1
+            STA     M
 
 * compute floor(10^n / m + 1/2), here thru (2 * 10^n + m) / (2*m)
-            LDA     EXP10
             ADD     EXP10
-            INCA    0,2
-            ENT3    0,2
-            INC3    0,2             rI3 now contains 2*m
-            ST3     VAR
+            ADD     EXP10
+            SRC     5
+            LDA     M
+            ADD     M               now rX holds 2*m
+            STA     VAR
             SRC     5
             ENTA    0
             DIV     VAR             now, rA contains rn(1/m), noted as 'r' (in short)
@@ -44,14 +50,18 @@ LOOP        ENT2    1
             STA     VAR1            rA holds (2r-1)
             LDA     EXP10
             ADD     EXP10
+            SRC     5
+            ENTA    0
             DIV     VAR1            rA now holds the largest m for which r(n)(1/m) = r
             STA     VAR1
-            DECA    -1,2
+            SUB     M
+            INCA    1
             MUL     VAR
             SRC     5
             ADD     SUM
-            LDA     SUM
-            LD2     0,VAR1          rI2 is replaced by the largest m
+            STA     SUM
+            LDA     VAR1
+            STA     M               update M with largest m
             JMP     1B
 PRINT       LDA     SUM
             CHAR    0
