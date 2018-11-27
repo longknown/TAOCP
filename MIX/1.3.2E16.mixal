@@ -38,9 +38,8 @@ LOOP        ENT2    1
             ADD     EXP10
             SRC     5
             LDA     M
-            ADD     M               now rX holds 2*m
+            ADD     M               now rA holds 2*m
             STA     VAR
-            SRC     5
             ENTA    0
             DIV     VAR             now, rA contains rn(1/m), noted as 'r' (in short)
             JAZ     PRINT           if r == 0, print Sn and continue to S(n+1)
@@ -50,8 +49,7 @@ LOOP        ENT2    1
             STA     VAR1            rA holds (2r-1)
             LDA     EXP10
             ADD     EXP10
-            SRC     5
-            ENTA    0
+            SRAX    5               shift rA to rX, and clear rA to 0
             DIV     VAR1            rA now holds the largest m for which r(n)(1/m) = r
             STA     VAR1
             SUB     M
